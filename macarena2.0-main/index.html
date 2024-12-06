@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tela de cadastro</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-image: linear-gradient(45deg, blue, red);
+
+        }
+
+        main {
+            background-color: rgba(0, 0, 0, 0.9);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 80px;
+            border-radius: 15px;
+            color: #fff;
+        }
+
+        input {
+            padding: 15px;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            width: 91%;
+        }
+
+        button {
+            background-color: dodgerblue;
+            border: none;
+            padding: 20px;
+            width: 100%;
+            border-radius: 15px;
+            color: #fff;
+        }
+
+        button:hover {
+            background-color: deeppink;
+            cursor: pointer;
+        }
+
+        table {
+            width: 50%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        .input-group {
+            padding: 10px  0;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>cadastro de produto</h1>
+        <form id="formCadastro">
+            <div class="input-group">
+                <label for="">Nome</label>
+                <input type="text" placeholder="Nome">
+            </div>
+            <div class="input-group">
+                <label for="">Descrição</label>
+                <input type="text" placeholder="Descrição">
+            </div>
+            <div class="input-group">
+                <label for="">Quantidade</label>
+                <input type="text" placeholder="Quantidade">
+            </div>
+            <button type="submit">Enviar</button>
+        </form>
+        <h1>Cadastro de Produto</h1>
+
+        <!-- Tabela onde os usuários serão listados -->
+        <table id="tabelaProdutos">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Produto</th>
+                    <th>Descrição</th>
+                    <th>Quantidade</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- As linhas serão preenchidas dinamicamente pelo JS -->
+            </tbody>
+        </table>
+    </main>
+
+
+    <script src="scripy.js"></script>
+</body>
+
+</html>
