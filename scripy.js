@@ -1,120 +1,148 @@
-// Adicionar um ouvinte de evento para carregar os dados da tabela ao carregar a página
-document.addEventListener('DOMContentLoaded', function () {
-    carregarTabela();
-});
+// Adiciona o evento ao formulário
+document.getElementById("formCadastro").addEventListener("submit", function(event) {
+    event.preventDefault();
 
-// Variável para armazenar o índice do produto sendo editado
-let produtoEditandoIndex = -1;
+    // Pega os valores dos campos do formulário
+    let nome = event.target[0].value;
+    let descricao = event.target[1].value;
+    let quantidade = event.target[2].value;
 
-// Função que carrega os dados da tabela a partir do localStorage
-function carregarTabela() {
-    const tabela = document.getElementById("tabelaProdutos").getElementsByTagName('tbody')[0];
-    tabela.innerHTML = ""; // Limpar a tabela antes de adicionar as novas linhas
-    const produtos = JSON.parse(localStorage.getItem("produtos")) || []; // Pega os produtos armazenados
-
-    // Adiciona cada produto à tabela
-    produtos.forEach((produto, index) => {
-        let row = tabela.insertRow();
-        row.insertCell(0).textContent = index + 1;
-        row.insertCell(1).textContent = produto.nome;
-        row.insertCell(2).textContent = produto.descricao;
-        row.insertCell(3).textContent = produto.quantidade;
-        let acoes = row.insertCell(4);
-
-        // Adicionar botão de edição
-        let btnEditar = document.createElement("button");
-        btnEditar.textContent = "Editar";
-        btnEditar.onclick = function () {
-            editarProduto(index);
-        };
-        acoes.appendChild(btnEditar);
-
-        // Adicionar botão de exclusão
-        let btnExcluir = document.createElement("button");
-        btnExcluir.textContent = "Excluir";
-        btnExcluir.onclick = function () {
-            excluirProduto(index);
-        };
-        acoes.appendChild(btnExcluir);
-    });
-}
-
-// Função para editar um produto
-function editarProduto(index) {
-    // Obter o produto a ser editado
-    const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-    const produto = produtos[index];
-
-    // Preencher os campos do formulário com os dados do produto
-    document.querySelector('input[placeholder="Nome"]').value = produto.nome;
-    document.querySelector('input[placeholder="Descrição"]').value = produto.descricao;
-    document.querySelector('input[placeholder="Quantidade"]').value = produto.quantidade;
-
-    // Armazenar o índice do produto sendo editado
-    produtoEditandoIndex = index;
-}
-
-// Função que é chamada ao enviar o formulário
-function enviarFormulario(event) {
-    event.preventDefault(); // Impede o envio padrão do formulário
-
-    // Obter os valores dos campos de input
-    const nome = document.querySelector('input[placeholder="Nome"]').value;
-    const descricao = document.querySelector('input[placeholder="Descrição"]').value;
-    const quantidade = document.querySelector('input[placeholder="Quantidade"]').value;
-
-    // Validar os campos
+    // Valida se os campos estão preenchidos
     if (nome === "" || descricao === "" || quantidade === "") {
-        alert("Por favor, preencha todos os campos!");
+        alert("Por favor, preencha todos os campos.");
         return;
     }
 
-    // Obter os produtos do localStorage
-    const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-
-    // Criar o novo produto ou atualizar o existente
-    const produto = {
-        nome: nome,
-        descricao: descricao,
-        quantidade: quantidade
-    };
-
-    if (produtoEditandoIndex === -1) {
-        // Se não houver índice de edição, é um novo produto
-        produtos.push(produto);
+    // Verifica se o formulário está em modo de edição
+    if (editandoProdutoId) {
+        // Atualiza o produto se estiver editando
+        atualizarProduto(editandoProdutoId, nome, descricao, quantidade);
     } else {
-        // Caso contrário, substitui o produto existente
-        produtos[produtoEditandoIndex] = produto;
-        produtoEditandoIndex = -1; // Resetar a variável de índice de edição
+        // Cria um novo produto
+        let produto = {
+            id: Date.now(), // ID único usando o timestamp
+            nome: nome,
+            descricao: descricao,
+            quantidade: quantidade
+        };
+        adicionarProdutoNaTabela(produto);
     }
 
-    // Armazenar novamente no localStorage
-    localStorage.setItem("produtos", JSON.stringify(produtos));
+    // Limpa os campos do formulário e desativa a edição
+    event.target.reset();
+    editandoProdutoId = null;
+});
 
-    // Limpar os campos do formulário
-    document.querySelector('input[placeholder="Nome"]').value = "";
-    document.querySelector('input[placeholder="Descrição"]').value = "";
-    document.querySelector('input[placeholder="Quantidade"]').value = "";
+// Variável para controlar se estamos editando um produto
+let editandoProdutoId = null;
 
-    // Recarregar a tabela
-    carregarTabela();
+function adicionarProdutoNaTabela(produto) {
+    let tabela = document.getElementById("tabelaProdutos").getElementsByTagName("tbody")[0];
+
+    // Cria uma nova linha na tabela
+    let novaLinha = tabela.insertRow();
+
+    // Adiciona as células para cada dado do produto
+    let celulaId = novaLinha.insertCell(0);
+    let celulaNome = novaLinha.insertCell(1);
+    let celulaDescricao = novaLinha.insertCell(2);
+    let celulaQuantidade = novaLinha.insertCell(3);
+    let celulaAcoes = novaLinha.insertCell(4);
+
+    // Preenche as células com os dados do produto
+    celulaId.textContent = produto.id;
+    celulaNome.textContent = produto.nome;
+    celulaDescricao.textContent = produto.descricao;
+    celulaQuantidade.textContent = produto.quantidade;
+
+    // Cria os botões de editar e excluir
+    let botaoEditar = document.createElement("button");
+    botaoEditar.textContent = "Editar";
+    botaoEditar.style.backgroundColor = "orange";
+    botaoEditar.style.marginRight = "5px";
+    botaoEditar.onclick = function() {
+        editarProduto(produto.id);
+    };
+
+    let botaoExcluir = document.createElement("button");
+    botaoExcluir.textContent = "Excluir";
+    botaoExcluir.style.backgroundColor = "red";
+    botaoExcluir.onclick = function() {
+        excluirProduto(produto.id);
+    };
+
+    // Adiciona os botões à célula de ações
+    celulaAcoes.appendChild(botaoEditar);
+    celulaAcoes.appendChild(botaoExcluir);
 }
 
-// Função para excluir um produto
-function excluirProduto(index) {
-    // Obter os produtos do localStorage
-    const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
+function editarProduto(id) {
+    let tabela = document.getElementById("tabelaProdutos").getElementsByTagName("tbody")[0];
+    let linhas = tabela.getElementsByTagName("tr");
 
-    // Remover o produto pelo índice
-    produtos.splice(index, 1);
+    for (let i = 0; i < linhas.length; i++) {
+        let celulaId = linhas[i].cells[0];
 
-    // Atualizar o localStorage
-    localStorage.setItem("produtos", JSON.stringify(produtos));
+        // Verifica se a linha corresponde ao ID do produto
+        if (celulaId.textContent == id) {
+            // Pega os dados da linha
+            let nome = linhas[i].cells[1].textContent;
+            let descricao = linhas[i].cells[2].textContent;
+            let quantidade = linhas[i].cells[3].textContent;
 
-    // Recarregar a tabela
-    carregarTabela();
+            // Preenche os campos do formulário com os dados do produto
+            document.getElementsByName("nome")[0].value = nome;
+            document.getElementsByName("descricao")[0].value = descricao;
+            document.getElementsByName("quantidade")[0].value = quantidade;
+
+            // Guarda o ID do produto que está sendo editado
+            editandoProdutoId = id;
+
+            // Remove a linha da tabela (pois o produto será editado)
+            tabela.deleteRow(i);
+            break;
+        }
+    }
 }
 
-// Adicionar evento de envio ao formulário
-document.getElementById('formCadastro').addEventListener('submit', enviarFormulario);
+function atualizarProduto(id, nome, descricao, quantidade) {
+    let tabela = document.getElementById("tabelaProdutos").getElementsByTagName("tbody")[0];
+    let linhas = tabela.getElementsByTagName("tr");
+
+    for (let i = 0; i < linhas.length; i++) {
+        let celulaId = linhas[i].cells[0];
+
+        if (celulaId.textContent == id) {
+            // Atualiza os dados da linha com os novos valores
+            linhas[i].cells[1].textContent = nome;
+            linhas[i].cells[2].textContent = descricao;
+            linhas[i].cells[3].textContent = quantidade;
+
+            // Atualiza o botão de editar
+            let botaoEditar = linhas[i].cells[4].getElementsByTagName("button")[0];
+            botaoEditar.onclick = function() {
+                editarProduto(id);
+            };
+
+            break;
+        }
+    }
+}
+
+function excluirProduto(id) {
+    let tabela = document.getElementById("tabelaProdutos").getElementsByTagName("tbody")[0];
+    let linhas = tabela.getElementsByTagName("tr");
+
+    for (let i = 0; i < linhas.length; i++) {
+        let celulaId = linhas[i].cells[0];
+
+        // Verifica se a linha corresponde ao ID do produto
+        if (celulaId.textContent == id) {
+            tabela.deleteRow(i);
+            break;
+        }
+    }
+}
+
+
 
